@@ -47,7 +47,7 @@ typedef enum En_timer0Interrupt_t{
 
 // for timer 1
 typedef enum En_timer1Mode_t{
-	T1_NORMAL_MODE=0x0000,T1_COMP_MODE_OCR1A_TOP=0x0008, T1_COMP_MODE_ICR1_TOP = 0x0018,Fast_PWM_10_bit = 0x0308  
+	T1_NORMAL_MODE=0x0000,T1_COMP_MODE_OCR1A_TOP=0x0008, T1_COMP_MODE_ICR1_TOP = 0x0018,T1_Fast_PWM_10_bit = 0x0308,T1_Fast_PWM_8_bit = 0x0108   
 
 }En_timer1Mode_t;
 typedef enum En_timer1OC_t{

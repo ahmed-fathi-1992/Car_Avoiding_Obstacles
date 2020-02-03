@@ -10,7 +10,7 @@
 
 void MotorDC_Init(En_motorType_t en_motor_number)
 {
-	timer0Init(T0_NORMAL_MODE,T0_OC0_DIS,T0_PRESCALER_256, 0, 0, T0_INTERRUPT_NORMAL);
+	//timer0Init(T0_NORMAL_MODE,T0_OC0_DIS,T0_PRESCALER_256, 0, 0, T0_INTERRUPT_NORMAL);
 		switch (en_motor_number)
 		{
 			case MOT_1:

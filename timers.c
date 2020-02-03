@@ -171,7 +171,6 @@ void timer0SwPWM(uint8_t u8_dutyCycle,uint8_t u8_frequency,EN_bits_t swpwm_pin_1
 void timer1Init(En_timer1Mode_t en_mode,En_timer1OC_t en_OC,En_timer1perscaler_t en_prescal, uint16_t u16_initialValue, uint16_t u16_outputCompareA, uint16_t u16_outputCompareB,uint16_t u16_inputCapture, En_timer1Interrupt_t en_interruptMask)
 {
 	TCCR1= TCCR1 | en_mode;
-	//TCCR1A=TCCR1A|en_mode
 	TCCR1= TCCR1 | en_OC;
 	TCCR1= TCCR1 | en_prescal;
 

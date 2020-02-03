@@ -5,6 +5,8 @@
  *  Author: ahmed_pc
  */ 
 
+#define Triger_pin 0x2
+
 
 typedef enum prog {
   seg_counter,
@@ -40,6 +42,7 @@ void Test_1(void);
 #include "std_types.h"
 #include "dcMotor.h"
 #include "SwICU.h"
+#include "HwPWM.h"
 
 uint32_t spwm_duty_cycle=0;
 EN_bits_t spwm_pin_1= MOTOR_EN_1_BIT;
@@ -53,7 +56,7 @@ volatile uint32_t testing=0;
 
 int main(void)
 {
-	prog program = ultrasonic; // select program to run GPIO_REQ7:(seg_counter) GPIO_REQ8:(Button_press) GPIO_REQ9:(Traffic_light)
+	prog program = Car; // select program to run GPIO_REQ7:(seg_counter) GPIO_REQ8:(Button_press) GPIO_REQ9:(Traffic_light)
 	                           // GPIO_REQ15:(MOTOR)  Ultrasonic 15cm range :ultrasonic Car Avoiding Obstacles(REQ4): Car
  switch (program)
   {
@@ -220,10 +223,6 @@ while(1);
 
 
 		
-
-
-
-
 void Ultrasonic(void)
 {
   uint8_t distance=0;
@@ -268,27 +267,30 @@ void Car_Avoiding_Obstacles(void)
 {
 	  uint8_t distance=0;
 	  
-	  gpioPinDirection(GPIOA,  0x2, OUTPUT);
+	  gpioPinDirection(GPIOA, Triger_pin, OUTPUT);
+	  
 	  Led_Init(LED_0); Led_Init(LED_1); Led_Init(LED_2); Led_Init(LED_3);
 	  Led_Off(LED_0); Led_Off(LED_1); Led_Off(LED_2); Led_Off(LED_3);
-	  
-      MotorDC_Init(MOT_1);
-      MotorDC_Init(MOT_2);
-	  
-      MotorDC_Speed_HwPWM(80);
 	  
 	  SwICU_Init(SwICU_EdgeRisiging);
 	 
 	  SwICU_Start();
-	  
+	 
+	  HwPWMInit();
+	 
+	        MotorDC_Init(MOT_1);
+	        MotorDC_Init(MOT_2);
+	        
+	         MotorDC_Speed_HwPWM(80); // set duty cycle to 80%
+	        
 	  SREG= SREG |0x80 ;// enable global interrupt
 	  
 	  while(1)
 	  {
 		  //send triger puls
-		  gpioPinWrite(GPIOA,  0x2, HIGH);
+		  gpioPinWrite(GPIOA,  Triger_pin, HIGH);
 		  softwareDelayMs(1);
-		  gpioPinWrite(GPIOA,  0x2, LOW);
+		  gpioPinWrite(GPIOA,  Triger_pin, LOW);
 		  
 		  distance= (Eco_width*16)/58; //calculating distance in cm
 		  if ((TIFR & 0x40) || distance > 15) //make sure range in 15 cm
@@ -302,10 +304,12 @@ void Car_Avoiding_Obstacles(void)
 			  PORTB_DATA= distance<<4; // show distance in binary on 4 leds
 		  }
 		  
-		  if (distance < 6) //make sure range in 15 cm
+		  
+		  if (distance > 12) //make sure it will stop on 5 cm (try and error)
 		  {
 			  	MotorDC_Dir(MOT_1, FORWARD);
-			  	MotorDC_Dir(MOT_2, FORWARD);
+			 	MotorDC_Dir(MOT_2, FORWARD);
+
 			  
 		  }else
 		  {
@@ -314,19 +318,29 @@ void Car_Avoiding_Obstacles(void)
 			  
 		  }
 		  
-		  
+	 
 
-		  softwareDelayMs(600); //to avoid flickering
+		  softwareDelayMs(100); //to avoid flickering
 	
 	
     }
   }
 void Test_1(void)
 {
-MotorDC_Dir(MOT_2, STOP);	
+//MotorDC_Dir(MOT_2, STOP);	
+      MotorDC_Init(MOT_1);
+      MotorDC_Init(MOT_2);
+      
+      // MotorDC_Speed_HwPWM(80);
+      			  	MotorDC_Dir(MOT_1, FORWARD);
+      			  	MotorDC_Dir(MOT_2, FORWARD);
+      gpioPinWrite(MOTOR_EN_1_GPIO, MOTOR_EN_1_BIT, HIGH);
+      gpioPinWrite(MOTOR_EN_2_GPIO, MOTOR_EN_2_BIT, HIGH);
+	  while(1);
+
 }
 
-/*
+
 ISR(TIMER0_OVF_vector)
 {
 	static volatile uint8_t flag =0;
@@ -362,7 +376,7 @@ ISR(TIMER0_OVF_vector)
 	}
 
 }
-*/
+
 
 
 ISR(INT2_vector)
@@ -392,17 +406,4 @@ ISR(INT2_vector)
 		 break;
 	 }
 	 
-	// Led_On(LED_1);
-	// softwareDelayMs(2000);
-	// Led_Off(LED_1);
-	// SwICU_Stop();
-
-	/*
-	  Led_On(LED_1);
-	  softwareDelayMs(2000);
-	  Led_Off(LED_1);
-	   SwICU_Stop();
-	//  softwareDelayMs(1000);
-	*/
-
 }
